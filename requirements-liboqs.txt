@@ -1,2 +1,0 @@
--r requirements.txt
-liboqs-python>=0.12   # first `import oqs` builds liboqs (needs git, cmake, C compiler; ~5-10 min once)
