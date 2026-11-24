@@ -36,7 +36,7 @@ educational, not constant-time). The active backend is printed at start-up (`cry
 * Force the fallback: `PQC_BACKEND=python python main.py`.
 * Both backends give identical key/signature sizes (ML-DSA-65: 1952 B key, 3309 B signature), and all tests pass on both.
 
-## Known simplifications (state these honestly in the report)
+## Known simplifications
 * Nodes run on one machine (localhost TCP demo, no peer discovery/gossip/consensus between nodes); registry is in memory rather than on-chain.
 * Proof-of-work is for illustration; real permissioned ledgers usually use BFT consensus.
 * Public ledger stores ciphertext only; one recipient per transaction (multi-recipient = one KEM ciphertext each).
