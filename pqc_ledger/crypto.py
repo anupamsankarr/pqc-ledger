@@ -13,11 +13,11 @@ HKDF-SHA256          | RFC 5869        | cryptography       | KEM secret -> AES 
 SHA-256              | NIST FIPS 180-4 | hashlib            | block hashing, Merkle tree
 scrypt               | RFC 7914        | cryptography       | passphrase-protected keystore
 
-* Backend selection: the pure-Python kyber-py / dilithium-py (FIPS 203/204, educational, NOT constant-time)
-  is the DEFAULT, so `pip install -r requirements.txt` always works. To use liboqs (C, constant-time) set
-  PQC_BACKEND=liboqs after `pip install -r requirements-liboqs.txt`. NOTE: the first `import oqs` can take
-  several minutes because liboqs-python builds the C library (needs git, cmake and a C compiler).
-  `crypto.BACKEND` says which backend is active (printed at start-up).
+* Backend selection (automatic): liboqs via `liboqs-python` (Open Quantum Safe, C, constant-time) when it
+  imports; otherwise the pure-Python fallback kyber-py / dilithium-py (educational, NOT constant-time).
+  Force the fallback with the environment variable PQC_BACKEND=python.  `crypto.BACKEND` says which is active.
+  NOTE: the first `import oqs` may take several minutes - liboqs-python builds the C library (needs git,
+  cmake and a C compiler). Later runs are instant.
 Randomness: liboqs uses the OS CSPRNG; the fallback uses os.urandom.
 """
 import hashlib
@@ -29,7 +29,7 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
 oqs = None
-if os.environ.get("PQC_BACKEND", "").lower() == "liboqs":   # OPT-IN: avoids a surprise C build at demo time
+if os.environ.get("PQC_BACKEND", "").lower() != "python":
     try:
         import oqs  # liboqs-python: may auto-build the liboqs C library on first import
         if "ML-KEM-768" not in oqs.get_enabled_kem_mechanisms() or \
