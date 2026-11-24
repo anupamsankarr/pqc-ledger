@@ -3,7 +3,7 @@
 Hybrid post-quantum blockchain prototype: **ML-KEM-768 (FIPS 203)** key encapsulation +
 **AES-256-GCM** payload encryption + **ML-DSA-65 (FIPS 204)** signatures + **SHA-256** hashing / Merkle tree / proof-of-work.
 
-## Setup (any OS: Windows / macOS / Linux, Python 3.9+, no compiler needed)
+## Setup (Linux/macOS: liboqs backend; any OS: pure-Python fallback)
 ```bash
 python -m venv .venv
 # Windows: .venv\Scripts\activate        macOS/Linux: source .venv/bin/activate
@@ -26,14 +26,15 @@ python -m unittest -v       # 16 unit tests
 | `main.py` | CLI menu |
 | `tests/` | Unit tests |
 
-## PQC backend: pure Python by default, liboqs optional
-`pqc_ledger/crypto.py` defaults to the pure-Python `kyber-py` / `dilithium-py` (FIPS 203/204-conformant but
-educational, not constant-time), so installation never needs a compiler. The active backend is printed at
-start-up (`crypto.BACKEND`).
-* Optional liboqs (C, constant-time): `pip install -r requirements-liboqs.txt`, then run with
-  `PQC_BACKEND=liboqs` (Windows PowerShell: `$env:PQC_BACKEND="liboqs"`). The first `import oqs` clones and builds
-  liboqs (needs `git`, `cmake`, a C compiler; 5-10 minutes once). Do this BEFORE the demo, never during it.
-* Both backends give identical key/signature sizes (ML-DSA-65: 1952 B key, 3309 B signature).
+## PQC backend: liboqs (preferred) with automatic pure-Python fallback
+`pqc_ledger/crypto.py` uses **liboqs** (Open Quantum Safe, C, constant-time) through `liboqs-python` when it
+imports, and otherwise falls back to the pure-Python `kyber-py` / `dilithium-py` (FIPS 203/204-conformant but
+educational, not constant-time). The active backend is printed at start-up (`crypto.BACKEND`).
+* `pip install liboqs-python` installs only a thin wrapper. The **first** `import oqs` clones and builds the liboqs
+  C library (needs `git`, `cmake`, a C compiler; about 5-10 minutes once). On Kali/Debian/Ubuntu:
+  `sudo apt install git cmake build-essential ninja-build libssl-dev`.
+* Force the fallback: `PQC_BACKEND=python python main.py`.
+* Both backends give identical key/signature sizes (ML-DSA-65: 1952 B key, 3309 B signature), and all tests pass on both.
 
 ## Known simplifications (state these honestly in the report)
 * Nodes run on one machine (localhost TCP demo, no peer discovery/gossip/consensus between nodes); registry is in memory rather than on-chain.
